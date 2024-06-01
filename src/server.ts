@@ -1,12 +1,12 @@
 import 'reflect-metadata';
-import * as dotenv from 'dotenv';
+import  dotenv from 'dotenv';
 
 dotenv.config({
   path: '.env',
 });
 
 import { ApolloServer } from 'apollo-server-express';
-import * as Express from 'express';
+import  Express from 'express';
 import { buildSchema } from 'type-graphql';
 import { AppDataSource } from './utils/dataSource';
 
