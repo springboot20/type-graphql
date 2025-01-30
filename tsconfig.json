@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
     "strict": true,
-    "target": "es6",
+    "target": "ESNext",
     "module": "commonjs",
-    "lib": ["dom", "es6", "es2017", "esnext.asynciterable"],
+    "lib": ["dom", "es6", "ESNext", "es2017", "esnext.asynciterable"],
     "sourceMap": true,
     "outDir": "./dist",
     "moduleResolution": "node",
     "declaration": false,
-
     "forceConsistentCasingInFileNames": true,
     "composite": false,
     "removeComments": true,
@@ -26,7 +25,10 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "baseUrl": ".",
-    "rootDir": "src"
+    "rootDir": "src",
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "types": ["node"]
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "include": ["./src/**/*.tsx", "./src/**/*.ts", "./src/types"]
 }

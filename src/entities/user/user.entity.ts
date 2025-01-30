@@ -1,6 +1,15 @@
-import { ObjectType, Field, ID } from 'type-graphql';
-import { Entity, ObjectId, ObjectIdColumn, Column, BaseEntity } from 'typeorm';
-
+import { Field, ID, ObjectType } from "type-graphql";
+import {
+  Entity,
+  ObjectId,
+  ObjectIdColumn,
+  BaseEntity,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import { UserAvatar } from "../avatar/avatar.entity";
+import { Todo } from "../todo/todo.entity";
 @ObjectType()
 @Entity()
 export class User extends BaseEntity {
@@ -8,22 +17,19 @@ export class User extends BaseEntity {
   @ObjectIdColumn()
   _id!: ObjectId;
 
-  @Field()
-  @Column()
-  firstname!: String;
+  @Field(() => [UserAvatar])
+  @OneToMany(() => UserAvatar, (avatar) => avatar.user)
+  avatars!: UserAvatar[];
+
+  @Field(() => [Todo])
+  @OneToMany(() => Todo, (todo) => todo.user)
+  todos!: Todo[];
 
   @Field()
-  @Column()
-  lastname!: String;
+  @CreateDateColumn({ type: "timestamp" })
+  createdAt!: Date;
 
   @Field()
-  @Column()
-  username!: string;
-
-  @Field()
-  @Column('text', { unique: true })
-  email!: string;
-
-  @Column()
-  password!: string;
+  @UpdateDateColumn({ type: "timestamp" })
+  updatedAt!: Date;
 }
