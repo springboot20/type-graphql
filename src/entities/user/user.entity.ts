@@ -7,9 +7,11 @@ import {
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  Column,
 } from "typeorm";
 import { UserAvatar } from "../avatar/avatar.entity";
 import { Todo } from "../todo/todo.entity";
+
 @ObjectType()
 @Entity()
 export class User extends BaseEntity {
@@ -24,6 +26,10 @@ export class User extends BaseEntity {
   @Field(() => [Todo])
   @OneToMany(() => Todo, (todo) => todo.user)
   todos!: Todo[];
+
+  @Field(() => ID, { nullable: true }) // Store only ObjectId
+  @Column("object-id")
+  authId!: ObjectId;
 
   @Field()
   @CreateDateColumn({ type: "timestamp" })

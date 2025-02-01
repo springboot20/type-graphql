@@ -2,10 +2,10 @@
   "compilerOptions": {
     "strict": true,
     "target": "ESNext",
-    "module": "commonjs",
     "lib": ["dom", "es6", "ESNext", "es2017", "esnext.asynciterable"],
     "sourceMap": true,
     "outDir": "./dist",
+    "module": "commonJs",
     "moduleResolution": "node",
     "declaration": false,
     "forceConsistentCasingInFileNames": true,
@@ -15,8 +15,6 @@
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
@@ -27,7 +25,12 @@
     "baseUrl": ".",
     "rootDir": "src",
     "typeRoots": ["./node_modules/@types", "./types"],
-    "types": ["node"]
+    "types": ["node"],
+    "allowJs": true,
+    "maxNodeModuleJsDepth": 10,
+    "noEmit": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "exclude": ["node_modules"],
   "include": ["./src/**/*.tsx", "./src/**/*.ts", "./src/types"]

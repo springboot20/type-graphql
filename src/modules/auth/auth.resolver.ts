@@ -7,6 +7,7 @@ import { RegisterInput } from "../register.input";
 import { isAuth } from "../../middleware/auth.middleware";
 import { Roles } from "../../types/roles";
 import { AuthResponse } from "../../entities/graphql/response/response.entity";
+import { User } from "../../entities/user/user.entity";
 
 @Resolver(Auth)
 export class AuthResolver {
@@ -17,18 +18,26 @@ export class AuthResolver {
     try {
       // Await the database query
       const existedUser = await Auth.findOne({ where: { email } });
+      const user = await User.findOne(existedUser?.userId as any);
       console.log("Found existing user:", existedUser); // Debugging
       // If user already exists, return an error
-      if (existedUser) {
+      if (existedUser || user) {
         return {
           errors: [
             {
               path: "email",
-              message: "User already exists",
+              message: "user already exists",
+            },
+            {
+              path: "user",
+              message: "user already has an auth",
             },
           ],
         };
       }
+
+      const new_user = User.create();
+      await new_user.save();
 
       // Hash the password
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -39,9 +48,19 @@ export class AuthResolver {
         email,
         role: Roles.USER,
         password: hashedPassword,
+        userId: new_user._id,
       });
 
       await auth.save();
+
+      new_user.authId = auth?._id;
+
+      await new_user.save();
+
+      // Check if authId is set
+      if (!new_user.authId) {
+        throw new Error("Failed to set authId");
+      }
 
       return { auth };
     } catch (error) {
@@ -58,6 +77,20 @@ export class AuthResolver {
     @Arg("password") password: string,
     @Ctx() ctx: Context
   ): Promise<AuthResponse> {
+    if (!email || !password) {
+      return {
+        errors: [
+          {
+            path: "email",
+            message: "Email is required",
+          },
+          {
+            path: "password",
+            message: "Password is required",
+          },
+        ],
+      };
+    }
     const auth = await Auth.findOne({ where: { email } });
 
     if (!auth) {
@@ -65,7 +98,7 @@ export class AuthResolver {
         errors: [
           {
             path: "email",
-            message: "users already exits",
+            message: "users doesn't exits",
           },
         ],
       };

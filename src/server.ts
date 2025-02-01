@@ -11,6 +11,7 @@ import { buildSchema } from "type-graphql";
 import { AppDataSource } from "./utils/dataSource";
 import session from "express-session";
 import cookieParser from "cookie-parser";
+import { graphqlUploadExpress } from "graphql-upload-ts";
 
 /**
  * Resolver
@@ -18,14 +19,11 @@ import cookieParser from "cookie-parser";
 import { AuthResolver } from "./modules/auth/auth.resolver";
 import { LogoutResolver } from "./modules/auth/logout.resolver";
 import { TodoResolver } from "./modules/todo/todo.resolver";
+import { AvatarResolver } from "./modules/auth/avatar.resolver";
 
 const main = async () => {
-  AppDataSource.initialize()
-    .then(() => console.log("Data Source has been initialized"))
-    .catch((err) => console.error(`Error during Data source initialization: ${err}`));
-
   const schema = await buildSchema({
-    resolvers: [AuthResolver, LogoutResolver, TodoResolver],
+    resolvers: [AuthResolver, LogoutResolver, TodoResolver, AvatarResolver],
     authChecker: async ({ context: { req } }) => {
       if ("userId" in req.session) {
         console.log(req.session.userId);
@@ -36,6 +34,10 @@ const main = async () => {
     },
   });
 
+  AppDataSource.initialize()
+    .then(() => console.log("Data Source has been initialized"))
+    .catch((err) => console.error(`Error during Data source initialization: ${err}`));
+
   const app: Express.Application = Express();
   const port = (process.env.PORT ?? 4401) as number;
 
@@ -43,6 +45,8 @@ const main = async () => {
     schema,
     context: ({ req, res }) => ({ req, res }),
   });
+
+  app.use(graphqlUploadExpress({ maxFileSize: 2 * 1000 * 1000 }));
 
   app.use(
     session({

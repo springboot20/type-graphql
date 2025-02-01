@@ -9,7 +9,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { User } from "./user.entity";
 
 @ObjectType()
 @Entity()
@@ -43,8 +42,8 @@ export class Auth extends BaseEntity {
   @Column()
   password!: string;
 
-  @Field(() => User)
-  @Column()
+  @Field(() => ID, { nullable: true }) // Store only ObjectId
+  @Column("object-id")
   userId!: ObjectId;
 
   @Field()
