@@ -1,38 +1,37 @@
 import { UserAvatar } from "../../entities/avatar/avatar.entity";
-import { Arg, Resolver, Mutation } from "type-graphql";
+import { Arg, Resolver, Mutation, Ctx, UseMiddleware } from "type-graphql";
 import { GraphQLUpload, FileUpload } from "graphql-upload-ts";
-import * as fs from "fs/promises";
+import { isAuth } from "../../middleware/auth.middleware";
+import { User } from "../../entities/user/user.entity";
+import { uploadFileToCloudinary } from "../../configs/cloudinary.config";
+import { Context } from "../../types/context";
 
 @Resolver(() => UserAvatar)
 export class AvatarResolver {
   @Mutation(() => UserAvatar)
-  async uploadUserAvatar(@Arg("file", () => GraphQLUpload) file: FileUpload): Promise<any> {
+  @UseMiddleware(isAuth)
+  async uploadUserAvatar(
+    @Arg("file", () => GraphQLUpload) file: FileUpload,
+    @Ctx() ctx: Context
+  ): Promise<UserAvatar> {
     try {
-      const { createReadStream } = file;
+      const userId = ctx.req.user?._id; // Get logged-in user's ID from the context
+      if (!userId) throw Error("Unauthorized");
 
-      const stream = createReadStream();
-      const chunks: any[] = [];
+      const uploadedFile = await uploadFileToCloudinary(file, "avatars");
 
-      let buffer = await new Promise<Buffer>((resolve, reject) => {
-        let buffer: Buffer;
+      // Save in DB
+      const user = await User.findOneOrFail(userId as any);
 
-        stream.on("data", function (chunk) {
-          chunks.push(chunk);
-        });
+      const avatar = new UserAvatar();
+      avatar.url = uploadedFile.secure_url;
+      avatar.user = user;
+      await avatar.save();
 
-        stream.on("end", function () {
-          buffer = Buffer.concat(chunks);
-          resolve(buffer);
-        });
-
-        stream.on("error", reject);
-      });
-
-      await fs.writeFile("upload.jpg", buffer as any);
-
-      return buffer.length;
+      return avatar;
     } catch (err) {
-      return 0;
+      console.error(err);
+      throw Error("File upload failed");
     }
   }
 }

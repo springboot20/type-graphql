@@ -5,6 +5,7 @@ import {
   ObjectIdColumn,
   BaseEntity,
   OneToMany,
+  OneToOne,
   CreateDateColumn,
   UpdateDateColumn,
   Column,
@@ -19,9 +20,9 @@ export class User extends BaseEntity {
   @ObjectIdColumn()
   _id!: ObjectId;
 
-  @Field(() => [UserAvatar])
-  @OneToMany(() => UserAvatar, (avatar) => avatar.user)
-  avatars!: UserAvatar[];
+  @Field(() => UserAvatar)
+  @OneToOne(() => UserAvatar, (avatar) => avatar.user)
+  avatars!: UserAvatar;
 
   @Field(() => [Todo])
   @OneToMany(() => Todo, (todo) => todo.user)
